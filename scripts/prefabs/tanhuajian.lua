@@ -31,26 +31,6 @@ local function spawntornado(staff, target, pos)
     end
 end
 
-local function Revive(inst,source)
-    if inst:HasTag("playerghost") then
-        inst:AddTag("revive_by_button");
-        inst:PushEvent("respawnfromghost", { source = source });
-        -- 生成光源，避免黑死。
-        local x, y, z = inst.Transform:GetWorldPosition();
-        if x and y and z then
-            SpawnPrefab("spawnlight_multiplayer").Transform:SetPosition(x, y, z);
-        end
-    end
-end
-
-local function CustomOnHaunt(inst)
-    local pos = Vector3(inst.Transform:GetWorldPosition())
-    local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, 30)
-    for k, v in pairs(ents) do
-        Revive(v,inst)
-    end
-end
-
 -- 在装备函数
 local function onequip(inst, owner) -- 参数 （自己 ， 装备者）
     -- 这里定义了一个叫做 onequip 的函数 参数是（装备自己 ， 装备的这个装备的对象【人或者生物，或者武器】）
@@ -126,8 +106,8 @@ local function fn()
     inst.components.spellcaster:SetSpellFn(spawntornado)
     inst.components.spellcaster.castingstate = "castspell_tornado"
 
-    MakeHauntableLaunch(inst) -- 添加作祟属性
-    AddHauntableCustomReaction(inst, CustomOnHaunt, true, nil, true)
+    inst:AddComponent("hauntable")
+    inst.components.hauntable:SetHauntValue(TUNING.HAUNT_INSTANT_REZ)
 
     MakeInventoryFloatable(inst, "med", 0.15, 0.65) -- 飘在水上
 
